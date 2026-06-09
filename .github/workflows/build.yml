@@ -28,36 +28,50 @@ jobs:
         ANDROID_JAR=$(find $ANDROID_HOME -name "android.jar" | head -1)
         echo "Using Android JAR: $ANDROID_JAR"
         
+        # Go into app/src/main where files are
+        cd app/src/main
+        
         # Create build directories
         mkdir -p build/gen build/obj build/dex
         
         # Compile resources
-        aapt2 compile -o build/gen --dir res/ 2>/dev/null || true
+        echo "📦 Compiling resources..."
+        aapt2 compile -o build/gen --dir res/
         
         # Link resources
-        aapt2 link -I $ANDROID_JAR --manifest AndroidManifest.xml -o build/app_unsigned.apk build/gen/*.flat 2>/dev/null || true
+        echo "🔗 Linking resources..."
+        aapt2 link -I $ANDROID_JAR --manifest AndroidManifest.xml -o build/app_unsigned.apk build/gen/*.flat
         
-        # Find and compile Java files
-        find src -name "*.java" > sources.txt
-        javac -cp $ANDROID_JAR -d build/obj @sources.txt 2>/dev/null || true
+        # Compile Java files
+        echo "☕ Compiling Java files..."
+        find java -name "*.java" > sources.txt
+        javac -cp $ANDROID_JAR -d build/obj @sources.txt
         
         # Convert to DEX
-        mkdir -p build/dex
-        d8 --lib $ANDROID_JAR --output build/dex build/obj/**/*.class 2>/dev/null || true
+        echo "🔄 Converting to DEX..."
+        d8 --lib $ANDROID_JAR --output build/dex $(find build/obj -name "*.class")
         
         # Package DEX into APK
+        echo "📦 Packaging APK..."
         cd build/dex
-        zip -u ../app_unsigned.apk classes.dex 2>/dev/null || true
+        zip -u ../app_unsigned.apk classes.dex
         cd ../..
         
         # Create debug keystore
-        keytool -genkey -v -keystore debug.keystore -alias debug -keyalg RSA -keysize 2048 -validity 10000 -storepass android -keypass android -dname "CN=Debug, OU=Debug, O=Debug, L=Debug, ST=Debug, C=US" -noprompt 2>/dev/null
+        echo "🔑 Creating keystore..."
+        keytool -genkey -v -keystore debug.keystore -alias debug -keyalg RSA -keysize 2048 -validity 10000 -storepass android -keypass android -dname "CN=Debug, OU=Debug, O=Debug, L=Debug, ST=Debug, C=US" -noprompt
         
         # Sign APK
-        apksigner sign --ks debug.keystore --ks-pass pass:android --out DxGTRouter.apk build/app_unsigned.apk 2>/dev/null || true
+        echo "✍️ Signing APK..."
+        apksigner sign --ks debug.keystore --ks-pass pass:android --out DxGTRouter.apk build/app_unsigned.apk
         
-        echo "APK built successfully!"
+        # Move APK to root for upload
+        mv DxGTRouter.apk ../../../
+        cd ../../..
+        
+        echo "✅ Build complete!"
         ls -la DxGTRouter.apk
+      shell: bash
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
