@@ -22,14 +22,25 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
     
-    - name: Create Gradle project
+    - name: Build APK with Gradle
       run: |
         cat > build.gradle << 'INNER'
         buildscript {
-            repositories { google(); mavenCentral() }
-            dependencies { classpath 'com.android.tools.build:gradle:8.1.0' }
+            repositories {
+                google()
+                mavenCentral()
+            }
+            dependencies {
+                classpath 'com.android.tools.build:gradle:8.1.0'
+            }
         }
-        allprojects { repositories { google(); mavenCentral() } }
+        
+        allprojects {
+            repositories {
+                google()
+                mavenCentral()
+            }
+        }
         INNER
         
         cat > settings.gradle << 'INNER'
@@ -38,13 +49,14 @@ jobs:
         INNER
         
         mkdir -p app/src/main
-        cp -r app/src/main/* app/src/main/
         
         cat > app/build.gradle << 'INNER'
         apply plugin: 'com.android.application'
+        
         android {
             namespace 'com.dxgt.sniper.audiorouter'
             compileSdk 34
+            
             defaultConfig {
                 applicationId "com.dxgt.sniper.audiorouter"
                 minSdk 23
@@ -52,7 +64,14 @@ jobs:
                 versionCode 1
                 versionName "1.0"
             }
+            
+            buildTypes {
+                debug {
+                    debuggable true
+                }
+            }
         }
+        
         dependencies {
             implementation 'androidx.appcompat:appcompat:1.6.1'
         }
@@ -60,6 +79,8 @@ jobs:
         
         gradle wrapper
         chmod +x gradlew
+        echo "✅ Gradle setup complete!"
+      shell: bash
     
     - name: Build APK
       run: ./gradlew assembleDebug --stacktrace
