@@ -21,16 +21,17 @@ jobs:
     
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
+      with:
+        accept-android-sdk-licenses: true
     
-    - name: Install build tools
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y aapt2
-        
     - name: Build APK
       run: |
-        ANDROID_JAR=$(find $ANDROID_HOME -name "android.jar" | head -1)
+        # Add build tools to PATH
+        export PATH=$ANDROID_HOME/build-tools/34.0.0:$PATH
+        ANDROID_JAR=$ANDROID_HOME/platforms/android-34/android.jar
+        
         echo "Using Android JAR: $ANDROID_JAR"
+        echo "Build tools: $(ls $ANDROID_HOME/build-tools/)"
         
         cd app/src/main
         
@@ -53,8 +54,10 @@ jobs:
         zip -u ../bin/app_unsigned.apk classes.dex
         cd ../..
         
-        echo "Signing APK..."
+        echo "Creating keystore..."
         keytool -genkey -v -keystore debug.keystore -alias debug -keyalg RSA -keysize 2048 -validity 10000 -storepass android -keypass android -dname "CN=Debug, OU=Debug, O=Debug, L=Debug, ST=Debug, C=US" -noprompt
+        
+        echo "Signing APK..."
         apksigner sign --ks debug.keystore --ks-pass pass:android --out DxGTRouter.apk build/bin/app_unsigned.apk
         
         mv DxGTRouter.apk ../../../
