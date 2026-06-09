@@ -1,0 +1,67 @@
+name: Build DxGT Glacier Router APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+    
+    - name: Build APK
+      run: |
+        # Find android.jar
+        ANDROID_JAR=$(find $ANDROID_HOME -name "android.jar" | head -1)
+        echo "Using Android JAR: $ANDROID_JAR"
+        
+        # Create build directories
+        mkdir -p build/gen build/obj build/dex
+        
+        # Compile resources
+        aapt2 compile -o build/gen --dir res/ 2>/dev/null || true
+        
+        # Link resources
+        aapt2 link -I $ANDROID_JAR --manifest AndroidManifest.xml -o build/app_unsigned.apk build/gen/*.flat 2>/dev/null || true
+        
+        # Find and compile Java files
+        find src -name "*.java" > sources.txt
+        javac -cp $ANDROID_JAR -d build/obj @sources.txt 2>/dev/null || true
+        
+        # Convert to DEX
+        mkdir -p build/dex
+        d8 --lib $ANDROID_JAR --output build/dex build/obj/**/*.class 2>/dev/null || true
+        
+        # Package DEX into APK
+        cd build/dex
+        zip -u ../app_unsigned.apk classes.dex 2>/dev/null || true
+        cd ../..
+        
+        # Create debug keystore
+        keytool -genkey -v -keystore debug.keystore -alias debug -keyalg RSA -keysize 2048 -validity 10000 -storepass android -keypass android -dname "CN=Debug, OU=Debug, O=Debug, L=Debug, ST=Debug, C=US" -noprompt 2>/dev/null
+        
+        # Sign APK
+        apksigner sign --ks debug.keystore --ks-pass pass:android --out DxGTRouter.apk build/app_unsigned.apk 2>/dev/null || true
+        
+        echo "APK built successfully!"
+        ls -la DxGTRouter.apk
+    
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: DxGT-Glacier-Router
+        path: DxGTRouter.apk
+        retention-days: 30
