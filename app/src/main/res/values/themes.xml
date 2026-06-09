@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Base application theme -->
-    <style name="Theme.Glacier" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="Theme.Glacier" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:statusBarColor">#0A1A2F</item>
         <item name="android:navigationBarColor">#0A1A2F</item>
         <item name="android:windowBackground">@drawable/glacier_bg_gradient</item>
