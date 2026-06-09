@@ -22,60 +22,51 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
     
-    - name: Build APK
+    - name: Create Gradle project
       run: |
-        # Find android.jar
-        ANDROID_JAR=$(find $ANDROID_HOME -name "android.jar" | head -1)
-        echo "Using Android JAR: $ANDROID_JAR"
+        cat > build.gradle << 'INNER'
+        buildscript {
+            repositories { google(); mavenCentral() }
+            dependencies { classpath 'com.android.tools.build:gradle:8.1.0' }
+        }
+        allprojects { repositories { google(); mavenCentral() } }
+        INNER
         
-        # Go into app/src/main where files are
-        cd app/src/main
+        cat > settings.gradle << 'INNER'
+        rootProject.name = "DxGTRouter"
+        include ':app'
+        INNER
         
-        # Create build directories
-        mkdir -p build/gen build/obj build/dex
+        mkdir -p app/src/main
+        cp -r app/src/main/* app/src/main/
         
-        # Compile resources
-        echo "📦 Compiling resources..."
-        aapt2 compile -o build/gen --dir res/
+        cat > app/build.gradle << 'INNER'
+        apply plugin: 'com.android.application'
+        android {
+            namespace 'com.dxgt.sniper.audiorouter'
+            compileSdk 34
+            defaultConfig {
+                applicationId "com.dxgt.sniper.audiorouter"
+                minSdk 23
+                targetSdk 34
+                versionCode 1
+                versionName "1.0"
+            }
+        }
+        dependencies {
+            implementation 'androidx.appcompat:appcompat:1.6.1'
+        }
+        INNER
         
-        # Link resources
-        echo "🔗 Linking resources..."
-        aapt2 link -I $ANDROID_JAR --manifest AndroidManifest.xml -o build/app_unsigned.apk build/gen/*.flat
-        
-        # Compile Java files
-        echo "☕ Compiling Java files..."
-        find java -name "*.java" > sources.txt
-        javac -cp $ANDROID_JAR -d build/obj @sources.txt
-        
-        # Convert to DEX
-        echo "🔄 Converting to DEX..."
-        d8 --lib $ANDROID_JAR --output build/dex $(find build/obj -name "*.class")
-        
-        # Package DEX into APK
-        echo "📦 Packaging APK..."
-        cd build/dex
-        zip -u ../app_unsigned.apk classes.dex
-        cd ../..
-        
-        # Create debug keystore
-        echo "🔑 Creating keystore..."
-        keytool -genkey -v -keystore debug.keystore -alias debug -keyalg RSA -keysize 2048 -validity 10000 -storepass android -keypass android -dname "CN=Debug, OU=Debug, O=Debug, L=Debug, ST=Debug, C=US" -noprompt
-        
-        # Sign APK
-        echo "✍️ Signing APK..."
-        apksigner sign --ks debug.keystore --ks-pass pass:android --out DxGTRouter.apk build/app_unsigned.apk
-        
-        # Move APK to root for upload
-        mv DxGTRouter.apk ../../../
-        cd ../../..
-        
-        echo "✅ Build complete!"
-        ls -la DxGTRouter.apk
-      shell: bash
+        gradle wrapper
+        chmod +x gradlew
+    
+    - name: Build APK
+      run: ./gradlew assembleDebug --stacktrace
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: DxGT-Glacier-Router
-        path: DxGTRouter.apk
+        path: app/build/outputs/apk/debug/*.apk
         retention-days: 30
