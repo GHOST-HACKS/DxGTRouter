@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/glacier_bg_gradient">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="20dp">
+
+            <!-- Snowflake Container -->
+            <FrameLayout
+                android:id="@+id/snowContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipChildren="false" />
+
+            <!-- Frosted Glass Panel -->
+            <LinearLayout
+                android:id="@+id/glassPanel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:background="@drawable/frosted_glass"
+                android:padding="20dp"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="❄️ DxGT GLACIER ROUTER ❄️"
+                    android:textColor="@color/glacier_text"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="10dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@dxgtsniper"
+                    android:textColor="@color/glacier_light_ice"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="20dp" />
+
+            </LinearLayout>
+
+            <!-- Rotating Ring Container -->
+            <FrameLayout
+                android:id="@+id/ringContainer"
+                android:layout_width="240dp"
+                android:layout_height="240dp"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@id/glassPanel"
+                android:layout_marginTop="30dp">
+
+                <ImageView
+                    android:id="@+id/rotatingRing"
+                    android:layout_width="220dp"
+                    android:layout_height="220dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ice_ring"
+                    android:alpha="0.9" />
+
+                <ImageView
+                    android:id="@+id/revolvingGlacier"
+                    android:layout_width="140dp"
+                    android:layout_height="140dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/glacier_core"
+                    android:alpha="0.95" />
+
+                <View
+                    android:id="@+id/glowOverlay"
+                    android:layout_width="240dp"
+                    android:layout_height="240dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/glow_effect"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/toggleButton"
+                    android:layout_width="130dp"
+                    android:layout_height="130dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/glacier_button_off"
+                    android:text="OFF\n❄️"
+                    android:textColor="@color/glacier_text"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:gravity="center" />
+
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/statusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/ringContainer"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="20dp"
+                android:text="⚡ STATUS: IDLE"
+                android:textColor="@color/glacier_light_ice"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/followButton"
+                android:layout_width="220dp"
+                android:layout_height="50dp"
+                android:layout_below="@id/statusText"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="30dp"
+                android:background="@drawable/glacier_button_off"
+                android:text="FOLLOW ON TIKTOK"
+                android:textColor="@color/glacier_white"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/followButton"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="30dp"
+                android:text="@dxgtsniper | Unlimited | Pro Mode Always On"
+                android:textColor="#3399FF"
+                android:textSize="11sp" />
+
+        </RelativeLayout>
+    </ScrollView>
+</FrameLayout>

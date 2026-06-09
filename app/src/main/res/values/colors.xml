@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="glacier_dark">#0A1A2F</color>
+    <color name="glacier_ice">#00BFFF</color>
+    <color name="glacier_light_ice">#66CCFF</color>
+    <color name="glacier_white">#E0F7FF</color>
+    <color name="glacier_text">#B0E0FF</color>
+</resources>
